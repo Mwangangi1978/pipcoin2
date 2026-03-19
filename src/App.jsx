@@ -1,8 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import logo from './pipcoin-logo.svg'
 import { trackField, updateLastField } from './hubspotTracking'
 import DesktopLayout from './components/DesktopLayout'
-import MobileLayout from './components/MobileLayout'
 
 const HUBSPOT_PORTAL_ID = import.meta.env.VITE_HUBSPOT_PORTAL_ID || 'YOUR_PORTAL_ID'
 const HUBSPOT_FORM_ID = import.meta.env.VITE_HUBSPOT_FORM_ID || 'YOUR_FORM_ID'
@@ -57,19 +56,6 @@ function App() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState('')
   const [isSuccess, setIsSuccess] = useState(false)
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth <= 680)
-
-  useEffect(() => {
-    const onResize = () => {
-      setIsMobile(window.innerWidth <= 680)
-    }
-
-    window.addEventListener('resize', onResize)
-
-    return () => {
-      window.removeEventListener('resize', onResize)
-    }
-  }, [])
 
   const progressPercent = useMemo(() => (step / 3) * 100, [step])
 
@@ -155,10 +141,6 @@ function App() {
     } finally {
       setIsSubmitting(false)
     }
-  }
-
-  if (isMobile) {
-    return <MobileLayout />
   }
 
   return (
