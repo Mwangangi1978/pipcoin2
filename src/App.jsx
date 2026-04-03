@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import logo from './pipcoin-logo.svg'
 import { trackField, updateLastField } from './hubspotTracking'
 import { submitContactToHubSpot } from './hubspotContactsAPI'
+import PrivacyPolicyPage from './PrivacyPolicyPage'
 
 const SENSITIVE_FIELDS = new Set([
   'hasDisability',
@@ -32,6 +33,7 @@ const initialFormData = {
 }
 
 function App() {
+  const isPrivacyPolicyPage = window.location.pathname.replace(/\/$/, '') === '/privacy-policy'
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState(initialFormData)
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -92,13 +94,17 @@ function App() {
     emitTracking('consentSensitiveData', checked)
   }
 
+  if (isPrivacyPolicyPage) {
+    return <PrivacyPolicyPage />
+  }
+
   const hasValue = (value) => String(value ?? '').trim().length > 0
 
   const getStepValidationErrors = (targetStep) => {
     const errors = []
 
     if (targetStep === 1) {
-      if (!formData.consentSensitiveData) errors.push('Consent to process sensitive data')
+      if (!formData.consentSensitiveData) errors.push('Consent to process sensitive data as per our Privacy Policy')
       if (!hasValue(formData.firstName)) errors.push('First Name')
       if (!hasValue(formData.lastName)) errors.push('Last Name')
       if (!hasValue(formData.emailAddress)) errors.push('Email')
@@ -196,7 +202,7 @@ function App() {
   }
 
   return (
-    <div className="export-wrapper">
+    <div id="top" className="export-wrapper">
       <header>
         <div className="container header-content">
           <div className="logo">
@@ -343,7 +349,8 @@ function App() {
                             checked={formData.consentSensitiveData}
                             onChange={(event) => handleConsentChange(event.target.checked)}
                           />
-                          Consent to process sensitive data
+                          <span>Consent to process sensitive data as per our</span>
+                          <a href="/privacy-policy" className="privacy-policy-link">Privacy Policy</a>
                         </label>
                       </div>
 
@@ -615,6 +622,7 @@ function App() {
             </div>
           </div>
         </section>
+
       </main>
 
       <footer>

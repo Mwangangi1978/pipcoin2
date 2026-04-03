@@ -3,6 +3,14 @@
     {
       "source": "/api/hubspot/:path*",
       "destination": "/api/hubspot.js"
+    },
+    {
+      "source": "/privacy-policy",
+      "destination": "/"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/"
     }
   ]
 }
