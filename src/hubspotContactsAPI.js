@@ -1,4 +1,10 @@
 const API_BASE = '/api/hubspot'
+const TARGET_LIST_NAME = 'pipcoin'
+const TARGET_LIST_ID = String(
+  import.meta.env.VITE_HUBSPOT_PIPCOIN_LIST_ID ||
+  import.meta.env.VITE_HUBSPOT_LIST_ID ||
+  ''
+).trim()
 
 const buildUserError = (userMessage, technicalMessage) => {
   const error = new Error(userMessage)
@@ -37,13 +43,18 @@ export const submitContactToHubSpot = async (formData) => {
     const contact = await createOrUpdateContact(formData)
     const contactId = contact.id
 
-    // Step 2: Get or create the "pipcoin" list
-    const listId = await getOrCreateList('pipcoin')
+    // Step 2: Resolve the target list and ensure membership.
+    const listId = TARGET_LIST_ID || await getExistingListId(TARGET_LIST_NAME)
+
+    if (!listId) {
+      throw buildUserError(
+        'We could not complete your submission right now. Please try again.',
+        `HubSpot list "${TARGET_LIST_NAME}" was not found`
+      )
+    }
 
     // Step 3: Add contact to list
-    if (listId) {
-      await addContactToList(contactId, listId)
-    }
+    await addContactToList(contactId, listId)
 
     return { success: true, contactId, listId }
   } catch (error) {
@@ -100,88 +111,57 @@ async function createOrUpdateContact(formData) {
   return data
 }
 
-async function getOrCreateList(listName) {
-  try {
-    // Try to fetch existing list
-    const lists = await fetchLists()
-    const existingList = lists.find(
-      (list) => list.name.toLowerCase() === listName.toLowerCase()
-    )
+async function getExistingListId(listName) {
+  const lists = await fetchAllLists()
+  const normalizedTarget = String(listName).trim().toLowerCase()
 
-    if (existingList) {
-      return existingList.listId
-    }
+  const existingList = lists.find((list) => {
+    const normalizedName = String(list?.name || '').trim().toLowerCase()
+    return normalizedName === normalizedTarget
+  })
 
-    // List creation can fail depending on app permissions; surface as non-blocking.
-    return null
-  } catch (error) {
-    console.error('List retrieval error:', error)
-    return null
-  }
+  return existingList?.listId || existingList?.id || null
 }
 
-async function fetchLists(apiKey) {
-  const response = await fetch(
-    `${API_BASE}/crm/v3/lists?limit=100&listTypeFilter=PROFESSIONAL`,
-    {
+async function fetchAllLists() {
+  const allLists = []
+  let after = null
+
+  do {
+    const query = after
+      ? `?limit=100&after=${encodeURIComponent(after)}`
+      : '?limit=100'
+
+    const response = await fetch(`${API_BASE}/crm/v3/lists${query}`, {
       headers: {
         'Content-Type': 'application/json',
       },
-    }
-  )
-
-  if (!response.ok) {
-    throw buildUserError(
-      getFriendlyMessageFromStatus(response.status),
-      `Failed to fetch lists (${response.status})`
-    )
-  }
-
-  const data = await response.json()
-  return data.results || []
-}
-
-async function createList(listName, apiKey) {
-  const payload = {
-    name: listName,
-    listType: 'PROFESSIONAL',
-  }
-
-  const response = await fetch(`${API_BASE}/crm/v3/lists`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify(payload),
-  })
-
-  if (!response.ok) {
-    const errorBody = await response.text()
-    console.error('List creation failed:', {
-      status: response.status,
-      body: errorBody,
     })
-    throw new Error(`Failed to create list: ${response.status}`)
-  }
 
-  const data = await response.json()
-  return data.listId
+    if (!response.ok) {
+      const errorBody = await response.text()
+      throw buildUserError(
+        getFriendlyMessageFromStatus(response.status),
+        `Failed to fetch lists (${response.status})${errorBody ? `: ${errorBody}` : ''}`
+      )
+    }
+
+    const data = await response.json()
+    const page = Array.isArray(data?.results) ? data.results : []
+    allLists.push(...page)
+    after = data?.paging?.next?.after || null
+  } while (after)
+
+  return allLists
 }
 
-async function addContactToList(contactId, listId, apiKey) {
-  const payload = {
-    inputs: [
-      {
-        id: contactId,
-      },
-    ],
-  }
+async function addContactToList(contactId, listId) {
+  const payload = [String(contactId)]
 
   const response = await fetch(
     `${API_BASE}/crm/v3/lists/${listId}/memberships/add`,
     {
-      method: 'POST',
+      method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
