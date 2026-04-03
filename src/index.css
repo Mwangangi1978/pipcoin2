@@ -159,9 +159,13 @@ header {
 }
 
 .hero-logo {
-  height: 44px;
+  height: 168px;
   display: block;
   object-fit: contain;
+}
+
+.hero-logo-badge {
+  margin-bottom: 32px;
 }
 
 .hero-title {
@@ -701,7 +705,7 @@ footer {
   }
 
   .hero-logo {
-    height: 36px;
+    height: 116px;
   }
 
   .btn-hero {
