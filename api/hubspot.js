@@ -14,33 +14,10 @@ const getForwardHeaders = (req) => {
 }
 
 const buildHubSpotUrl = (req) => {
-  const pathParts = Array.isArray(req.query.path)
-    ? req.query.path
-    : req.query.path
-      ? [req.query.path]
-      : []
-
-  const query = new URLSearchParams()
-
-  Object.entries(req.query || {}).forEach(([key, value]) => {
-    if (key === 'path') {
-      return
-    }
-
-    if (Array.isArray(value)) {
-      value.forEach((item) => query.append(key, String(item)))
-      return
-    }
-
-    if (value !== undefined && value !== null) {
-      query.append(key, String(value))
-    }
-  })
-
-  const path = pathParts.join('/')
-  const qs = query.toString()
-
-  return `${HUBSPOT_BASE_URL}/${path}${qs ? `?${qs}` : ''}`
+  // In Vercel, req.url contains the original request path
+  // e.g., "/api/hubspot/crm/v3/objects/contacts?limit=10"
+  const targetPath = req.url.replace(/^\/api\/hubspot/, '');
+  return `${HUBSPOT_BASE_URL}${targetPath}`;
 }
 
 const getBody = (req) => {
@@ -48,15 +25,12 @@ const getBody = (req) => {
     return undefined
   }
 
-  if (req.body === undefined || req.body === null) {
-    return undefined
+  // Vercel automatically parses JSON bodies into objects
+  if (typeof req.body === 'object' && req.body !== null) {
+    return JSON.stringify(req.body)
   }
 
-  if (typeof req.body === 'string') {
-    return req.body
-  }
-
-  return JSON.stringify(req.body)
+  return req.body
 }
 
 export default async function handler(req, res) {
