@@ -59,11 +59,11 @@ body {
 .container {
   max-width: 1120px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 clamp(16px, 2.5vw, 28px);
 }
 
 section {
-  padding: 96px 0;
+  padding: clamp(64px, 9vw, 96px) 0;
 }
 
 .section-title {
@@ -87,6 +87,9 @@ header {
   border-bottom: 1px solid var(--border);
   padding: 20px 0;
   background: var(--background);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .header-content {
@@ -100,6 +103,12 @@ header {
   height: 36px;
   display: block;
   object-fit: contain;
+}
+
+.header-cta {
+  width: auto;
+  padding: 8px 14px;
+  font-size: 13px;
 }
 
 .btn {
@@ -134,8 +143,8 @@ header {
 
 .hero-section {
   text-align: center;
-  padding-top: 120px;
-  padding-bottom: 80px;
+  padding-top: clamp(84px, 11vw, 120px);
+  padding-bottom: clamp(56px, 8vw, 80px);
 }
 
 .hero-container {
@@ -156,7 +165,7 @@ header {
 }
 
 .hero-title {
-  font-size: 56px;
+  font-size: clamp(34px, 5.4vw, 56px);
   font-weight: 800;
   color: #211f20;
   line-height: 1.1;
@@ -165,7 +174,7 @@ header {
 }
 
 .hero-subtitle {
-  font-size: 20px;
+  font-size: clamp(17px, 2.25vw, 20px);
   color: var(--muted-foreground);
   margin-bottom: 40px;
   max-width: 640px;
@@ -262,7 +271,14 @@ header {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 24px;
+}
+
+.step-card {
   text-align: center;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px 22px;
 }
 
 .step-number {
@@ -293,6 +309,10 @@ header {
   border-radius: var(--radius-lg);
   padding: 40px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+}
+
+.form-wrapper form {
+  width: 100%;
 }
 
 .progress-bar-container {
@@ -399,6 +419,15 @@ header {
   margin-top: 8px;
 }
 
+.form-actions .btn-outline {
+  flex: 0 0 auto;
+  min-width: 132px;
+}
+
+.form-actions .btn-next {
+  flex: 1 1 auto;
+}
+
 .btn-next {
   width: 100%;
   padding: 16px;
@@ -433,109 +462,40 @@ footer {
   color: var(--muted-foreground);
 }
 
-iconify-icon {
-  display: inline-block;
-  width: 1em;
-  height: 1em;
-  line-height: 1;
-}
-
 @media (max-width: 991px) {
-  section {
-    padding: 72px 0;
-  }
-
-  .hero-section {
-    padding-top: 92px;
-    padding-bottom: 64px;
-  }
-
-  .hero-title {
-    font-size: 44px;
-  }
-
   .grid-3,
   .grid-4 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .check-list {
+    gap: 18px 28px;
+  }
+
+  .form-wrapper {
+    padding: 32px;
+  }
 }
 
 @media (max-width: 680px) {
-  .container {
-    padding: 0 20px;
-  }
-
-  section {
-    padding: 64px 0;
-  }
-
   header {
-    padding: 16px 0;
+    padding: 14px 0;
   }
 
   .header-content {
-    flex-direction: row;
-    align-items: center;
+    flex-wrap: nowrap;
     justify-content: space-between;
-  }
-
-  .logo img {
-    height: 28px;
-  }
-
-  .header-actions .btn {
-    padding: 8px 12px;
-    font-size: 13px;
-  }
-
-  .hero-section {
-    padding-top: 56px;
-    padding-bottom: 48px;
-  }
-
-  .hero-logo {
-    height: 36px;
-  }
-
-  .hero-title {
-    font-size: 32px;
-    line-height: 1.2;
-    margin-bottom: 16px;
-    letter-spacing: -0.02em;
-  }
-
-  .hero-subtitle {
-    font-size: 16px;
-    margin-bottom: 32px;
+    align-items: center;
+    gap: 10px;
   }
 
   .section-title {
-    font-size: 28px;
-    margin-bottom: 12px;
+    font-size: 30px;
   }
 
   .section-subtitle {
     font-size: 16px;
     margin-bottom: 40px;
-  }
-
-  .btn-hero {
-    width: 100%;
-    font-size: 16px;
-    padding: 16px 24px;
-  }
-
-  .check-list {
-    flex-direction: column;
-    gap: 16px;
-    margin-top: 32px;
-    align-items: stretch;
-    justify-content: flex-start;
-  }
-
-  .check-item {
-    gap: 12px;
-    font-size: 15px;
   }
 
   .grid-3,
@@ -544,50 +504,38 @@ iconify-icon {
     grid-template-columns: 1fr;
   }
 
-  .card {
-    padding: 32px 24px;
+  .step-card {
+    padding: 22px 18px;
   }
 
-  .card-icon {
-    width: 48px;
-    height: 48px;
-    margin-bottom: 20px;
-    background: var(--secondary);
+  .check-list {
+    flex-direction: column;
+    align-items: flex-start;
+    width: fit-content;
+    margin: 32px auto 0;
+    gap: 12px;
   }
 
-  .card-title,
-  .step-title {
-    font-size: 18px;
-    margin-bottom: 8px;
+  .check-item {
+    font-size: 15px;
   }
 
-  .step-number {
-    font-size: 20px;
-    margin-bottom: 12px;
+  .header-actions {
+    flex: 0 0 auto;
   }
 
-  .form-wrapper {
-    padding: 24px 20px;
-  }
-
-  .progress-bar-container {
-    margin-bottom: 24px;
-  }
-
-  .form-header {
-    margin-bottom: 24px;
-  }
-
-  .form-step-text {
+  .header-actions .header-cta {
+    width: auto;
+    padding: 6px 12px;
     font-size: 12px;
-  }
-
-  .form-group {
-    margin-bottom: 20px;
   }
 
   .form-section {
     padding: 64px 0;
+  }
+
+  .form-wrapper {
+    padding: 22px 18px;
   }
 
   .form-title,
@@ -602,5 +550,29 @@ iconify-icon {
   .btn-outline,
   .btn-next {
     width: 100%;
+  }
+
+  .icon-arrow {
+    display: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .logo img {
+    height: 24px;
+  }
+
+  .header-actions .header-cta {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
+
+  .hero-logo {
+    height: 36px;
+  }
+
+  .btn-hero {
+    font-size: 16px;
+    padding: 14px 18px;
   }
 }
